@@ -59,6 +59,7 @@ class AlipayAdapter implements PaymentInterface
     }
 }
 
+
 // 微信支付适配器
 class WechatPayAdapter implements PaymentInterface
 {
