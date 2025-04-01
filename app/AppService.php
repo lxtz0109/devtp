@@ -18,5 +18,8 @@ class AppService extends Service
     public function boot()
     {
         // 服务启动
+        $this->commands([
+            'progressbar:bar' => \app\command\ProgressBarCommand::class,
+        ]);
     }
 }
