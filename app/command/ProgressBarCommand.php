@@ -20,7 +20,7 @@ class ProgressBarCommand extends Command
     {
 
         // 模拟要处理的数据总量
-        $total = 100;
+        $total = 50*20;
 
         // 创建进度条
         $progressBar = new ProgressBar( new ConsoleOutput(), $total);
@@ -28,14 +28,16 @@ class ProgressBarCommand extends Command
 
         $output->writeln('开始处理数据...');
 
+
+        echo "开始时间：".date("Y-m-d H:i:s")."\n";
         // 模拟处理过程
         for ($i = 0; $i < $total; $i++) {
-            sleep(2);
+            sleep(3);
             // 更新进度条
             $progressBar->advance();
 
         }
-
+        echo "结束时间：".date("Y-m-d H:i:s")."\n";
 
 
         // 完成进度条
@@ -45,28 +47,6 @@ class ProgressBarCommand extends Command
 
 
 
-        /*$total = 50;
-        $barLength = 50;
 
-        $output->writeln('开始处理:');
-
-        for ($i = 1; $i <= $total; $i++) {
-            // 计算进度百分比
-            $percent = round(($i / $total) * 100);
-
-            // 计算当前进度条长度
-            $progress = round(($i / $total) * $barLength);
-
-            // 构建进度条字符串
-            $bar = str_repeat('=', $progress) . '>' . str_repeat(' ', $barLength - $progress);
-
-            // 输出进度信息
-            $output->write("\r[$bar] $percent%");
-
-            // 模拟处理耗时
-            usleep(100000); // 0.1秒
-        }
-
-        $output->writeln("\n处理完成!");*/
     }
 }
