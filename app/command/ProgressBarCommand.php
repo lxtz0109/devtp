@@ -40,8 +40,6 @@ class ProgressBarCommand extends Command
         echo "结束时间：".date("Y-m-d H:i:s")."\n";
 
 
-
-
         // 完成进度条
         $progressBar->finish();
         $output->writeln('');
