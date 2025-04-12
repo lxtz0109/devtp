@@ -14,7 +14,7 @@ use think\App;
 // [ 应用入口文件 ]
 
 require __DIR__ . '/../vendor/autoload.php';
-echo 'ss';exit;
+
 // 执行HTTP应用并响应
 $http = (new App())->http;
 
