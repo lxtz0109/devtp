@@ -48,5 +48,6 @@ class ProgressBarCommand extends Command
 
 
 
+
     }
 }
