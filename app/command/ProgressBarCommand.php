@@ -45,6 +45,7 @@ class ProgressBarCommand extends Command
         $output->writeln('');
         $output->writeln('数据处理完成!');
 
+        
 
 
 
