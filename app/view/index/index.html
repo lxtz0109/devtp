@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+ <html>
+ <head>
+         <meta charset="utf-8">
+         <title>2026年元旦倒计时</title>
+         <style>
+    .countdown-container {
+                    font-family: 'Microsoft YaHei', sans-serif;
+                    text-align: center;
+                    margin-top: 100px;
+               }
+           .countdown-title {
+                                font-size: 28px;
+                              color: #333;
+                                margin-bottom: 30px;
+                         }
+             .countdown-box {
+                               display: inline-block;
+                               margin: 0 10px;
+                           }
+             .countdown-value {
+                               display: block;
+                                font-size: 48px;
+                                font-weight: bold;
+                                color: #e74c3c;
+                               background: #f9f9f9;
+                               padding: 15px 25px;
+                               border-radius: 8px;
+                              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                          }
+             .countdown-label {
+                                margin-top: 10px;
+                   font-size: 16px;
+                                color: #777;
+                           }
+        </style>
+     </head>
+ <body>
+     <div class="countdown-container">
+            <div class="countdown-title">距离2026年元旦还有：</div>
+             <div>
+                 <div class="countdown-box">
+                     <span class="countdown-value" id="days">{$days}</span>
+                     <span class="countdown-label">天</span>
+                 </div>
+                 <div class="countdown-box">
+                     <span class="countdown-value" id="hours">{$hours}</span>
+                     <span class="countdown-label">小时</span>
+                </div>
+                <div class="countdown-box">
+                     <span class="countdown-value" id="minutes">{$minutes}</span>
+                     <span class="countdown-label">分钟</span>
+                 </div>
+                <div class="countdown-box">
+                    <span class="countdown-value" id="seconds">{$seconds}</span>
+                     <span class="countdown-label">秒</span>
+                 </div>
+             </div>
+         </div>
+
+     <script>
+            // 自动刷新倒计时（每秒更新一次）
+            setInterval(function() {
+                     location.reload();
+                }, 1000);
+        </script>
+ </body>
+ </html>

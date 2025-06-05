@@ -24,7 +24,8 @@
         "topthink/framework": "^8.0",
         "topthink/think-orm": "^3.0|^4.0",
         "topthink/think-filesystem": "^2.0",
-        "symfony/console": "^7.2"
+        "symfony/console": "^7.2",
+        "topthink/think-view": "^2.0"
     },
     "require-dev": {
         "topthink/think-dumper": "^1.0",
