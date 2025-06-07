@@ -22,11 +22,11 @@ Route::get('phpinfo', 'index/phpinfo');
 
 //适配器模式
 Route::get('adapter', 'Pay/index');
-
+//随机红包
 Route::get('suiji', 'index/suiji');
-
-
-
+//时辰
+Route::get('suiji', 'index/shichen');
+//定位打卡
 Route::get('punch', 'Punch/index');
 Route::get('punch/getLocation', 'Punch/getLocation');
 Route::post('punch/submit', 'Punch/submit');
