@@ -4,7 +4,7 @@ namespace app\controller;
 
 use app\BaseController;
 use think\facade\View;
-
+use think\facade\Db;
 class Index extends BaseController
 {
     public function indexs()
@@ -54,4 +54,38 @@ class Index extends BaseController
     public function phpinfo(){
         phpinfo();
     }
+
+
+    public function suiji(){
+       /* $string = "这是第一行<br>这是第二行";
+        echo $string."<br>";
+        echo date("Y-m-d H:i:s")."<br>";
+
+        $i = 1;
+        while ($i < 13){
+            $rs  = rand(1,10000);
+           echo("第".$i."月收入数据：".$rs."<br>");
+            $i++;
+        }*/
+        $shicheng = ["子时","丑时","寅时","卯时","辰时","巳时","午时","未时","申时","酉时","戌时","亥时",];
+       // $arr = [110,111,112,113,114,115,116];
+        $arr = [117,118,119,120,121,122,123];
+        for ($i = 0; $i < count($arr); $i++) {
+
+            for ($j = 0; $j < count($shicheng); $j++) {
+                $data['shichen'] = $shicheng[$j];
+                $data['relation_id'] = $arr[$i];
+                $data['datetime'] =date("Y-m-d H:i:s");
+
+                $result = Db::name('desmond_happy_detail')->insert($data);
+                echo "done succ".date("Y-m-d H:i:s")."<br>";
+                echo $result."<br>";
+            }
+
+        }
+
+
+    }
+
+
 }

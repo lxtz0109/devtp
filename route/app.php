@@ -23,3 +23,4 @@ Route::get('phpinfo', 'index/phpinfo');
 //适配器模式
 Route::get('adapter', 'Pay/index');
 
+Route::get('suiji', 'index/suiji');
