@@ -24,3 +24,9 @@ Route::get('phpinfo', 'index/phpinfo');
 Route::get('adapter', 'Pay/index');
 
 Route::get('suiji', 'index/suiji');
+
+
+
+Route::get('punch', 'Punch/index');
+Route::get('punch/getLocation', 'Punch/getLocation');
+Route::post('punch/submit', 'Punch/submit');
