@@ -60,14 +60,54 @@ class Index extends BaseController
 
         echo date("Y-m-d H:i:s")."<br>";
         $sum = 0;
-        $i = 1;
+        $year = [2020];
+        $month = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+        foreach ($year as $y){
+            echo "===========================".$y."年================================="."<br>";
+            $total = 0;
+            foreach ($month as $m){
+                echo "==========================".$y."年".$m."月================================"."<br>";
+                if (in_array($m, [1,3,5,7,8,10,12])){
+                    $days = 31;
+                }else{
+                    $days = 30;
+                }
+                if ($m == 2){
+                    if($y%4 == 0){
+                        $days = 28;
+                    }else{
+                        $days = 29;
+                    }
+                }
+                $sum = 0;
+                $i = 1;
+                while ($i < $days+1){
+                    $rs  = rand(1,100000);
+                    echo($y."年".$m."月".$i."号收入数据：".$rs."<br>");
+                    $i++;
+                    $sum += $rs;
+                }
+                echo $y."年".$m."月总收入为：".$sum."<br>";
+                $total += $sum;
+
+            }
+            echo($y."年"."收入数据：".$total."<br>");
+            echo "<br>";
+
+        }
+
+     /*
+      echo date("Y-m-d H:i:s")."<br>";
+        $sum = 0;
+       $i = 1;
         while ($i < 31){
-            $rs  = rand(1,60000);
-            echo("6月".$i."号收入数据：".$rs."<br>");
+            $rs  = rand(1,100000);
+            echo("月".$i."号收入数据：".$rs."<br>");
             $i++;
             $sum += $rs;
         }
-        echo "6月总收入为：".$sum."<br>";
+        echo "6月总收入为：".$sum."<br>";*/
 
 
 
