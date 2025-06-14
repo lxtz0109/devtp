@@ -30,3 +30,7 @@ Route::get('suiji', 'index/shichen');
 Route::get('punch', 'Punch/index');
 Route::get('punch/getLocation', 'Punch/getLocation');
 Route::post('punch/submit', 'Punch/submit');
+
+//分配固定金额红包到每一天
+Route::get('bonus', 'index/distributeBonus');
+
