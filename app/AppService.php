@@ -19,7 +19,7 @@ class AppService extends Service
     {
         // 服务启动
         $this->commands([
-            'progressbar:bar' => \app\command\ProgressBarCommand::class,
+            'progress:bar' => \app\command\ProgressBarCommand::class,
         ]);
     }
 }
