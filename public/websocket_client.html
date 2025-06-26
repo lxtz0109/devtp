@@ -127,7 +127,8 @@
         if (message && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
                 type: 'chat',
-                content: message
+                content: message,
+                name: userName
             }));
 
             input.value = '';
@@ -139,14 +140,14 @@
         const messagesDiv = document.getElementById('chat-messages');
         let messageHtml = '';
 
-      /*  if (type === 'system') {
+        if (type === 'system') {
             messageHtml = `<div class="system-message">[${new Date().toLocaleTimeString()}] ${content}</div>`;
-        } else {*/
+        } else {
             messageHtml = `<div class="user-message">
                     <span class="user-name">[${new Date().toLocaleTimeString()}] ${sender}:</span>
                     <span>${content}</span>
                 </div>`;
-       /* }*/
+        }
 
         messagesDiv.innerHTML += messageHtml;
         messagesDiv.scrollTop = messagesDiv.scrollHeight;

@@ -5,13 +5,11 @@ class WebSocketMessage
 {
     public function handle($event)
     {
-       var_dump('hall');
+
         list($server, $frame) = $event;
-        
+
         // 解析客户端消息
         $data = json_decode($frame->data, true);
-        var_dump("websockt 收到消息");
-        var_dump($data);
         if (!$data) {
             $server->push($frame->fd, json_encode(['code' => 400, 'message' => 'Invalid message format']));
             return;
@@ -36,9 +34,13 @@ class WebSocketMessage
     
     protected function broadcastMessage($server, $senderFd, $data)
     {
+        var_dump('==============');
+        var_dump($data);
+        var_dump('==============');
         $message = [
             'type' => 'chat',
-            'from' => $senderFd,
+            //'from' => $senderFd,
+            'from'  =>  $data['name'] ?? "Guest_{$senderFd}",
             'content' => $data['content'] ?? '',
             'time' => time()
         ];
@@ -46,9 +48,9 @@ class WebSocketMessage
         // 遍历所有连接的客户端
         foreach ($server->connections as $fd) {
             // 排除发送者
-            if ($fd != $senderFd && $server->isEstablished($fd)) {
+            //if ($fd != $senderFd && $server->isEstablished($fd)) {
                 $server->push($fd, json_encode($message));
-            }
+            //}
         }
     }
     
@@ -68,13 +70,15 @@ class WebSocketMessage
         $server->push($fd, json_encode([
             'code' => 200,
             'message' => 'Login success',
-            'user' => $user
+            'user' => $user,
+            'name' => $data['name'] ?? "Guest_{$user['fd']}"
         ]));
-        
+
         // 通知其他用户有新用户加入
         $this->broadcastMessage($server, $fd, [
             'type' => 'system',
-            'content' => "用户： {$user['name']} 加入了聊天"
+            'content' => "用户： {$user['name']} 加入了聊天",
+            'name' => $data['name'] ?? "Guest_{$user['fd']}"
         ]);
     }
 }    

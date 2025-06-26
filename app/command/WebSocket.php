@@ -32,15 +32,9 @@ class WebSocket extends Command
         $server->on('Message', function (WebSocketServer $server, $frame) {
             // 触发事件处理消息
             var_dump("收到消息");
-            //$data = json_decode($frame->data, true);
-           // var_dump($data);
-          //  Event::trigger('WebSocketMessage', [$server, $frame]);
             try {
-                echo 'aaaa';
                 Event::trigger('WebSocketMessage', [$server, $frame]);
             } catch (\Exception $e) {
-                echo 'bbbb';
-                var_dump($e->getMessage());
                 \think\facade\Log::error('事件触发失败: ' . $e->getMessage());
             }
         });
