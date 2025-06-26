@@ -20,7 +20,7 @@ class ProgressBarCommand extends Command
     {
 
         // 模拟要处理的数据总量
-        $total = 100;
+        $total = 108;
 
         // 创建进度条
         $progressBar = new ProgressBar( new ConsoleOutput(), $total);

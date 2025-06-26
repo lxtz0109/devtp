@@ -17,7 +17,7 @@ Route::get('think', function () {
 Route::get('hello/:name', 'index/hello');
 
 
-Route::get('indexadmin', 'index');
+Route::get('indexadmin', 'index/indexs');
 Route::get('phpinfo', 'index/phpinfo');
 
 //适配器模式
@@ -34,3 +34,6 @@ Route::post('punch/submit', 'Punch/submit');
 //分配固定金额红包到每一天
 Route::get('bonus', 'index/distributeBonus');
 
+
+
+Route::get('lottery/draw', 'LotteryController/draw');

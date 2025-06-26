@@ -20,6 +20,8 @@ class AppService extends Service
         // 服务启动
         $this->commands([
             'progress:bar' => \app\command\ProgressBarCommand::class,
+            'websocket:serve' => \app\command\WebSocket::class,
+
         ]);
     }
 }

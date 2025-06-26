@@ -10,8 +10,10 @@ return [
         'HttpEnd'  => [],
         'LogLevel' => [],
         'LogWrite' => [],
+        'WebSocketMessage' => [app\listener\WebSocketMessage::class],
     ],
 
     'subscribe' => [
     ],
+
 ];

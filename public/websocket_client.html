@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Chat Demo</title>
+    <style>
+        #chat-container {
+            width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        #chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        #message-input {
+            width: 700px;
+            padding: 8px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        #send-button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .system-message {
+            color: #888;
+            font-style: italic;
+        }
+        .user-message {
+            margin-bottom: 8px;
+        }
+        .user-name {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div id="chat-container">
+    <div id="chat-messages"></div>
+    <input type="text" id="message-input" placeholder="输入消息...">
+    <button id="send-button">发送</button>
+</div>
+
+<script>
+    // 连接WebSocket服务器
+    console.log(`ws://${window.location.hostname}:9501`);
+    const ws = new WebSocket(`ws://${window.location.hostname}:9501`);
+    let userName = null;
+
+    // 连接成功时触发
+    ws.onopen = function() {
+        appendMessage('系统', '已连接到服务器，请输入您的昵称', 'system');
+
+        // 请求用户输入昵称
+        userName = prompt('请输入您的昵称:');
+        if (!userName) {
+            userName = `Guest_${Math.floor(Math.random() * 1000)}`;
+            console.log(userName);
+        }
+        console.log(userName);
+        // 发送登录消息
+        ws.send(JSON.stringify({
+            type: 'login',
+            name: userName
+        }));
+    };
+
+    // 接收到消息时触发
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        switch (data.type) {
+            case 'chat':
+                appendMessage(
+                    data.from === ws.extensions ? '你' : data.from,
+                    data.content,
+                    data.from === ws.extensions ? 'self' : 'other'
+                );
+                break;
+
+            case 'system':
+                appendMessage('系统', data.content, 'system');
+                break;
+
+            case 'login':
+                if (data.code === 200) {
+                    appendMessage('系统', `欢迎 ${data.user.name} 加入聊天`, 'system');
+                } else {
+                    appendMessage('系统', `登录失败: ${data.message}`, 'system');
+                }
+                break;
+        }
+    };
+
+    // 连接关闭时触发
+    ws.onclose = function() {
+        appendMessage('系统', '与服务器的连接已关闭', 'system');
+    };
+
+    // 发送消息
+    document.getElementById('send-button').addEventListener('click', function() {
+        sendMessage();
+    });
+
+    // 按Enter键发送消息
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // 发送消息函数
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+
+        if (message && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                type: 'chat',
+                content: message
+            }));
+
+            input.value = '';
+        }
+    }
+
+    // 追加消息到聊天窗口
+    function appendMessage(sender, content, type) {
+        const messagesDiv = document.getElementById('chat-messages');
+        let messageHtml = '';
+
+      /*  if (type === 'system') {
+            messageHtml = `<div class="system-message">[${new Date().toLocaleTimeString()}] ${content}</div>`;
+        } else {*/
+            messageHtml = `<div class="user-message">
+                    <span class="user-name">[${new Date().toLocaleTimeString()}] ${sender}:</span>
+                    <span>${content}</span>
+                </div>`;
+       /* }*/
+
+        messagesDiv.innerHTML += messageHtml;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    }
+</script>
+</body>
+</html>
