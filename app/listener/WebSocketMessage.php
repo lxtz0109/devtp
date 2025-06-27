@@ -77,7 +77,7 @@ class WebSocketMessage
         // 通知其他用户有新用户加入
         $this->broadcastMessage($server, $fd, [
             'type' => 'system',
-            'content' => "用户： {$user['name']} 加入了聊天",
+            'content' => "加入了聊天",
             'name' => $data['name'] ?? "Guest_{$user['fd']}"
         ]);
     }

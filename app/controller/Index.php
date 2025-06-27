@@ -7,16 +7,15 @@ use think\facade\View;
 use think\facade\Db;
 class Index extends BaseController
 {
-    public function indexs()
+    public function indexadmin()
     {
 
-        echo  'indexs';exit;
+        echo  phpinfo();exit;
 
         return '<style>*{ padding: 0; margin: 0; }</style><iframe src="https://www.thinkphp.cn/welcome?version=' . \think\facade\App::version() . '" width="100%" height="100%" frameborder="0" scrolling="auto"></iframe>';
     }
     public function index()
     {
-        echo  phpinfo();
         // 设置目标日期（2026年元旦）
         $targetDate = '2026-01-01 00:00:00';
         $targetTimestamp = strtotime($targetDate);

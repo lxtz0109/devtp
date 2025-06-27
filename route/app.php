@@ -16,8 +16,8 @@ Route::get('think', function () {
 
 Route::get('hello/:name', 'index/hello');
 
-
-Route::get('indexadmin', 'index/indexs');
+//php info
+Route::get('indexadmin', 'index/indexadmin');
 Route::get('phpinfo', 'index/phpinfo');
 
 //适配器模式
@@ -35,5 +35,8 @@ Route::post('punch/submit', 'Punch/submit');
 Route::get('bonus', 'index/distributeBonus');
 
 
-
+//红包发放
 Route::get('lottery/draw', 'LotteryController/draw');
+//redis测试
+Route::get('redistest', 'RedisController/cacheExample');
+
