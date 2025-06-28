@@ -37,6 +37,8 @@ Route::get('bonus', 'index/distributeBonus');
 
 //红包发放
 Route::get('lottery/draw', 'LotteryController/draw');
+
+Route::get('lottery/millon', 'LotteryController/millon');
 //redis测试
 Route::get('redistest', 'RedisController/cacheExample');
 

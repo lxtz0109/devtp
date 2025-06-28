@@ -9,10 +9,11 @@ class RedisController
     public function cacheExample()
     {
 
+        $keys = 'member:userinfo_1003600';
         // 设置缓存
-        Cache::set('user_info_215004', [
-            'id'   => 215004,
-            'name' => '德罗赞',
+        Cache::set($keys, [
+            'id'   => 1003600,
+            'name' => '百万打卡',
             'score'   => 159,
             'create_date'   =>date('Y-m-d h:i:s',time()),
             'update_date'   =>date('Y-m-d h:i:s',time()),
@@ -20,7 +21,7 @@ class RedisController
         ], 3600);
 
         // 获取缓存
-        $user = Cache::get('user_info_215004');
+        $user = Cache::get($keys);
 
         return json([
             'user' => $user,

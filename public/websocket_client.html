@@ -1,90 +1,310 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <title>WebSocket Chat Demo</title>
     <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
         #chat-container {
             width: 800px;
+            height: 600px;
             margin: 0 auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
+
+        #chat-header {
+            background-color: #07c160;
+            color: white;
+            padding: 10px 15px;
+            font-weight: 500;
+            font-size: 18px;
+        }
+
         #chat-messages {
-            height: 400px;
+            flex: 1;
             overflow-y: auto;
+            padding: 15px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            max-width: 70%;
+            clear: both;
+            position: relative;
+        }
+
+        .message.self {
+            align-self: flex-end;
+            background-color: #95ec69;
+            border-radius: 18px 18px 0 18px;
+        }
+
+        .message.other {
+            align-self: flex-start;
+            background-color: white;
+            border-radius: 18px 18px 18px 0;
+        }
+
+        .message-content {
+            padding: 10px 15px;
+            word-wrap: break-word;
+        }
+
+        .message-meta {
+            font-size: 14px;
+            /* 放大发送时间字体 */
+            color: #888;
+            margin-bottom: 2px;
+            padding: 0 15px;
+        }
+
+        .system-message {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+
+        #input-area {
+            display: flex;
+            align-items: center;
             padding: 10px;
-            background-color: #f9f9f9;
+            background-color: white;
+            border-top: 1px solid #eee;
         }
-        #message-input {
-            width: 700px;
+
+        #emoji-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
             padding: 8px;
-            margin: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
+            color: #666;
         }
+
+        #message-input {
+            flex: 1;
+            padding: 10px 15px;
+            margin: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px;
+        }
+
         #send-button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
+            padding: 10px 18px;
+            background-color: #07c160;
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 20px;
             cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
         }
-        .system-message {
-            color: #888;
-            font-style: italic;
+
+        #send-button:hover {
+            background-color: #06b056;
         }
-        .user-message {
-            margin-bottom: 8px;
+
+        #emoji-panel {
+            position: absolute;
+            bottom: 80px;
+            width: 350px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            display: none;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
         }
-        .user-name {
-            font-weight: bold;
+
+        .emoji-item {
+            font-size: 20px;
+            cursor: pointer;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .emoji-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* 自定义模态框样式 */
+        #nickname-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        #nickname-modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #nickname-modal input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px;
+        }
+
+        #nickname-modal button {
+            padding: 10px 18px;
+            background-color: #07c160;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        #nickname-modal button:hover {
+            background-color: #06b056;
         }
     </style>
 </head>
+
 <body>
 <div id="chat-container">
+    <div id="chat-header">实时聊天</div>
     <div id="chat-messages"></div>
-    <input type="text" id="message-input" placeholder="输入消息...">
-    <button id="send-button">发送</button>
+    <div id="input-area">
+        <button id="emoji-btn">😀</button>
+        <input type="text" id="message-input" placeholder="输入消息...">
+        <button id="send-button">发送</button>
+    </div>
+    <div id="emoji-panel">
+        <!-- 表情将通过JavaScript动态生成 -->
+    </div>
+</div>
+
+<!-- 自定义模态框 -->
+<div id="nickname-modal">
+    <div id="nickname-modal-content">
+        <p>请输入您的昵称:</p>
+        <input type="text" id="nickname-input">
+        <button id="nickname-submit">确定</button>
+    </div>
 </div>
 
 <script>
+    // 表情数据
+    const emojis = [
+        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣",
+        "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰",
+        "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜",
+        "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏",
+        "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",
+        "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠",
+        "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨",
+        "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥"
+    ];
+
     // 连接WebSocket服务器
     console.log(`ws://${window.location.hostname}:9501`);
     const ws = new WebSocket(`ws://${window.location.hostname}:9501`);
     let userName = null;
 
+    // 初始化表情面板
+    const emojiPanel = document.getElementById('emoji-panel');
+    emojis.forEach(emoji => {
+        const emojiItem = document.createElement('div');
+        emojiItem.className = 'emoji-item';
+        emojiItem.textContent = emoji;
+        emojiItem.onclick = () => insertEmoji(emoji);
+        emojiPanel.appendChild(emojiItem);
+    });
+
+    // 显示/隐藏表情面板
+    document.getElementById('emoji-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        emojiPanel.style.display = emojiPanel.style.display === 'grid' ? 'none' : 'grid';
+    });
+
+    // 点击其他区域关闭表情面板
+    document.addEventListener('click', () => {
+        emojiPanel.style.display = 'none';
+    });
+
+    // 插入表情到输入框
+    function insertEmoji(emoji) {
+        const input = document.getElementById('message-input');
+        input.value = input.value + emoji;
+        input.focus();
+    }
+
     // 连接成功时触发
-    ws.onopen = function() {
+    ws.onopen = function () {
         appendMessage('系统', '已连接到服务器，请输入您的昵称', 'system');
 
-        // 请求用户输入昵称
-        userName = prompt('请输入您的昵称:');
-        if (!userName) {
-            userName = `Guest_${Math.floor(Math.random() * 1000)}`;
+        // 显示自定义模态框
+        const nicknameModal = document.getElementById('nickname-modal');
+        nicknameModal.style.display = 'block';
+
+        // 提交昵称
+        document.getElementById('nickname-submit').addEventListener('click', function () {
+            const nicknameInput = document.getElementById('nickname-input');
+            userName = nicknameInput.value.trim();
+            if (!userName) {
+                userName = `Guest_${Math.floor(Math.random() * 1000)}`;
+            }
             console.log(userName);
-        }
-        console.log(userName);
-        // 发送登录消息
-        ws.send(JSON.stringify({
-            type: 'login',
-            name: userName
-        }));
+            // 发送登录消息
+            ws.send(JSON.stringify({
+                type: 'login',
+                name: userName
+            }));
+            // 隐藏模态框
+            nicknameModal.style.display = 'none';
+        });
     };
 
     // 接收到消息时触发
-    ws.onmessage = function(event) {
+    ws.onmessage = function (event) {
         const data = JSON.parse(event.data);
 
         switch (data.type) {
             case 'chat':
                 appendMessage(
-                    data.from === ws.extensions ? '你' : data.from,
+                    data.from === userName ? '你' : data.from,
                     data.content,
-                    data.from === ws.extensions ? 'self' : 'other'
+                    data.from === userName ? 'self' : 'other'
                 );
                 break;
 
@@ -103,17 +323,17 @@
     };
 
     // 连接关闭时触发
-    ws.onclose = function() {
+    ws.onclose = function () {
         appendMessage('系统', '与服务器的连接已关闭', 'system');
     };
 
     // 发送消息
-    document.getElementById('send-button').addEventListener('click', function() {
+    document.getElementById('send-button').addEventListener('click', function () {
         sendMessage();
     });
 
     // 按Enter键发送消息
-    document.getElementById('message-input').addEventListener('keypress', function(e) {
+    document.getElementById('message-input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
@@ -141,18 +361,20 @@
         let messageHtml = '';
 
         if (type === 'system') {
-            messageHtml = `<div class="system-message">[${new Date().toLocaleTimeString()}] ${content}</div>`;
+            messageHtml = `<div class="system-message">${content}</div>`;
         } else {
-            messageHtml = `<div class="user-message">
-                    <span class="user-name">[${new Date().toLocaleTimeString()}] ${sender}:</span>
-                    <span>${content}</span>
-                </div>`;
+            messageHtml = `
+                    <div class="message ${type}">
+                        <div class="message-meta">${sender} - ${new Date().toLocaleTimeString()}</div>
+                        <div class="message-content">${content}</div>
+                    </div>
+                `;
         }
 
-        messagesDiv.innerHTML += messageHtml;
+        messagesDiv.insertAdjacentHTML('beforeend', messageHtml);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
     }
 </script>
 </body>
+
 </html>

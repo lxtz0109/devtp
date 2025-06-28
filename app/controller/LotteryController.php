@@ -17,8 +17,14 @@ class LotteryController
     ];
 
     // 姓名字库
-    private $surnames = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈'];
-    private $names = ['伟', '芳', '娜', '秀英', '敏', '静', '强', '磊', '军', '洋'];
+    private $surnames = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈',
+        '褚','卫','蒋','沈','韩','杨','朱','秦','尤','许','何','吕','施','张',
+        '孔','曹','严','华','金','魏','陶','姜','戚','谢','邹','喻','柏','水','窦','章','云','苏','潘','葛','奚','范','彭','郎',];
+    private $names = ['伟', '芳', '娜', '秀英', '敏', '静', '强', '磊', '军', '洋',
+        '是', '芳', '娜', '中华', '中', '静', '蒙', '统', '传', '国',
+        '日', '平', '闽', '华', '敏', '静', '强', '磊', '军', '洋',
+        '羊', '松', '伟杰', '一', '敏', '静', '之', '磊', '经', '典',
+        '羊', '松', '伟杰', '一', '敏', '静', '之', '磊', '经', '典',];
 
     /**
      * 执行抽奖接口
@@ -56,6 +62,27 @@ class LotteryController
                 'id' => $i + 1,
                 'name' => $surname . $name,
                 'prize' => null
+            ];
+        }
+        return $users;
+    }
+
+    /**
+     * 生成指定数量的随机用户
+     */
+    private function generateUsersCopy($count)
+    {
+        $users = [];
+        for ($i = 0; $i < $count; $i++) {
+            $surname = $this->surnames[array_rand($this->surnames)];
+            $name = $this->names[array_rand($this->names)];
+            $randomNumber = str_pad(random_int(0, pow(10, 12) - 1), 12, '0', STR_PAD_LEFT);
+
+            $users[] = [
+                'user_id' => "362430".$randomNumber,
+                'user_name' => $surname . $name,
+                'prize_name' => "吉安市永新县居民",
+                'create_time' => date('Y-m-d H:i:s', time()),
             ];
         }
         return $users;
@@ -138,5 +165,14 @@ class LotteryController
 
         // 缓存中奖名单（1天）
         Cache::set('lottery_results', $results, 86400);
+    }
+
+
+    public function millon(){
+        // 生成100个参与抽奖的用户
+        $users = $this->generateUsersCopy(8956);
+        // 写入数据库
+        Db::name('lottery_results')->insertAll($users);
+        return json(['code' => 200,'msg'=>'success']);
     }
 }
