@@ -26,12 +26,12 @@ class WebSocket extends Command
         // 注册WebSocket事件
         $server->on('Open', function (WebSocketServer $server, $request) {
             //$output->writeln("New connection established: {$request->fd}");
-            echo "New connection: {$request->fd}\n";
+           // echo "New connection: {$request->fd}\n";
         });
 
         $server->on('Message', function (WebSocketServer $server, $frame) {
             // 触发事件处理消息
-            var_dump("收到消息");
+           // var_dump("收到消息");
             try {
                 Event::trigger('WebSocketMessage', [$server, $frame]);
             } catch (\Exception $e) {
@@ -41,10 +41,10 @@ class WebSocket extends Command
 
         $server->on('Close', function (WebSocketServer $server, $fd) {
            // $output->writeln("Connection closed: {$fd}");
-            echo "Connection closed: {$fd}\n";
+          //  echo "Connection closed: {$fd}\n";
             // 通知其他用户
             $user = $server->connection_info($fd)['user'] ?? null;
-            var_dump($user);
+           // var_dump($user);
             if ($user) {
                 $message = [
                     'type' => 'system',
@@ -62,7 +62,7 @@ class WebSocket extends Command
         // 注册任务处理
         $server->on('Task', function (WebSocketServer $server, $task) {
             //$output->writeln("Task processing: {$task->id}");
-            echo "Task processing: {$task->id}";
+          //  echo "Task processing: {$task->id}";
             // 处理异步任务
             $result = call_user_func_array($task->data['callback'], $task->data['params']);
 
@@ -71,10 +71,10 @@ class WebSocket extends Command
 
         $server->on('Finish', function (WebSocketServer $server, $taskId, $data) {
             //$output->writeln("Task completed: {$taskId}");
-            echo "Task completed: {$taskId}";
+           // echo "Task completed: {$taskId}";
         });
 
-        $output->writeln("WebSocket server started at ws://{$config['host']}:{$config['port']}");
+       // $output->writeln("WebSocket server started at ws://{$config['host']}:{$config['port']}");
 
         $server->start();
     }
