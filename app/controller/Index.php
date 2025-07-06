@@ -9,10 +9,69 @@ class Index extends BaseController
 {
     public function indexadmin()
     {
+        try {
+            // 原始字符串
+            $string = '10a';
+
+
+            // 转换为二进制（字符串本身就是二进制的文本表示）
+            $binaryData = $this->stringToBinary($string);
+
+            // 写入文件
+            $filePath = public_path() . 'storage/a.txt';
+
+            $this->writeToFile($filePath, $binaryData);
+
+            return json([
+                'code' => 200,
+                'message' => '数据写入成功',
+                'file_path' => $filePath,
+                'original_string' => $string,
+                'binaryData' => $binaryData,
+                'binary_size' => strlen($binaryData) . ' 字节'
+            ]);
+        } catch (\Exception $e) {
+            return json([
+                'code' => 500,
+                'message' => $e->getMessage()
+            ]);
+        }
 
         echo  phpinfo();exit;
 
         return '<style>*{ padding: 0; margin: 0; }</style><iframe src="https://www.thinkphp.cn/welcome?version=' . \think\facade\App::version() . '" width="100%" height="100%" frameborder="0" scrolling="auto"></iframe>';
+    }
+
+    /**
+     * 将字符串转换为二进制格式
+     */
+    private function stringToBinary($string)
+    {
+
+        $bytes = unpack('C*', $string);
+        $binary = '';
+        foreach ($bytes as $byte) {
+            $binary .= " ".str_pad(decbin($byte), 8, '0', STR_PAD_LEFT);
+        }
+
+
+        return $binary;
+
+    }
+
+    /**
+     * 写入文件
+     */
+    private function writeToFile($filePath, $data)
+    {
+        // 确保目录存在
+        $dir = dirname($filePath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        // 写入二进制数据（使用FILE_BINARY标志确保二进制安全）
+        file_put_contents($filePath, $data,FILE_APPEND );
     }
     public function index()
     {

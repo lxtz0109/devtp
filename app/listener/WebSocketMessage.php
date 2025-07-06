@@ -7,7 +7,9 @@ class WebSocketMessage
     {
 
         list($server, $frame) = $event;
-
+        var_dump("===============begin==============");
+        var_dump($frame->data);
+        var_dump("================end=============");
         // 解析客户端消息
         $data = json_decode($frame->data, true);
         if (!$data) {
