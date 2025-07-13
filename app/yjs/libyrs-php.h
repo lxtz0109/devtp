@@ -1,5 +1,4 @@
-#define FFI_LIB "/mnt/d/yjs/app/yjs/libyrs.so"
-
+#define FFI_LIB "/www/tpdev/app/yjs/libyrs.so"
 typedef struct YDoc {} YDoc;
 typedef struct Branch {} Branch;
 typedef struct TransactionInner TransactionInner;
