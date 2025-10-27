@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE 实时数据展示</title>
+    <!-- 引入 Tailwind CSS 实现高颜值样式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome 图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6', // 主色调：蓝色（科技感）
+                        secondary: '#10b981', // 辅助色：绿色（成功/运行状态）
+                        danger: '#ef4444', // 危险色：红色（错误/停止状态）
+                        dark: '#1e293b', // 深色：背景/文本
+                        light: '#f8fafc' // 浅色：背景
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                },
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-glass {
+                background: rgba(255,255,255,0.8);
+                backdrop-filter: blur(8px);
+            }
+            .border-gradient {
+                border-image: linear-gradient(to right, #3b82f6, #10b981) 1;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-light to-blue-50 min-h-screen flex flex-col">
+<!-- 顶部导航栏 -->
+<header class="bg-glass border-b border-blue-100 sticky top-0 z-50 shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <i class="fa fa-bolt text-primary text-2xl"></i>
+            <h1 class="text-xl md:text-2xl font-bold text-dark">SSE 实时数据中心</h1>
+        </div>
+        <div id="status-indicator" class="flex items-center gap-2 text-sm">
+            <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+            <span class="text-gray-500">未连接</span>
+        </div>
+    </div>
+</header>
+
+<!-- 主内容区 -->
+<main class="flex-1 container mx-auto px-4 py-8 md:py-12">
+    <!-- 控制区 -->
+    <div class="max-w-3xl mx-auto mb-8 bg-white rounded-xl shadow-md p-6 border border-blue-50 animate-fade-in">
+        <h2 class="text-lg md:text-xl font-semibold text-dark mb-4 flex items-center gap-2">
+            <i class="fa fa-sliders text-primary"></i>
+            操作控制
+        </h2>
+        <div class="flex flex-wrap gap-3">
+            <button id="start-btn" class="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg shadow flex items-center gap-2 transition-all duration-300 hover:shadow-md">
+                <i class="fa fa-play"></i>
+                <span>开始接收数据</span>
+            </button>
+            <button id="stop-btn" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow flex items-center gap-2 transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fa fa-stop"></i>
+                <span>停止接收</span>
+            </button>
+            <button id="clear-btn" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow flex items-center gap-2 transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fa fa-trash"></i>
+                <span>清空内容</span>
+            </button>
+        </div>
+        <div class="mt-4 text-sm text-gray-500">
+            <i class="fa fa-info-circle text-primary"></i>
+            <span>点击"开始接收数据"后，将实时获取 SSE 接口返回的内容</span>
+        </div>
+    </div>
+
+    <!-- 数据展示区 -->
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md border border-blue-50 animate-fade-in">
+        <!-- 数据标题栏 -->
+        <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 rounded-t-xl flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-dark flex items-center gap-2">
+                <i class="fa fa-file-text-o text-primary"></i>
+                实时数据内容
+            </h2>
+            <div id="data-stats" class="text-sm text-gray-500">
+                <span>字符数：<span id="char-count">0</span></span>
+            </div>
+        </div>
+
+        <!-- 加载动画（初始隐藏） -->
+        <div id="loading-container" class="hidden flex justify-center items-center h-64">
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-gray-500">正在连接 SSE 接口...</p>
+            </div>
+        </div>
+
+        <!-- 错误提示（初始隐藏） -->
+        <div id="error-container" class="hidden p-6 text-danger">
+            <div class="flex items-start gap-3">
+                <i class="fa fa-exclamation-circle text-xl mt-0.5"></i>
+                <div>
+                    <h3 class="font-semibold">连接错误</h3>
+                    <p id="error-message" class="text-sm mt-1">无法连接到 SSE 接口，请检查接口地址是否正确</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据内容区 -->
+        <div id="data-container" class="p-6 min-h-64 max-h-[500px] overflow-y-auto text-dark leading-relaxed whitespace-pre-wrap">
+            <div class="text-gray-400 text-center py-12">
+                <i class="fa fa-comment-o text-4xl mb-3"></i>
+                <p>点击"开始接收数据"按钮，实时内容将显示在这里</p>
+            </div>
+        </div>
+
+        <!-- 数据完成提示（初始隐藏） -->
+        <div id="complete-container" class="hidden bg-green-50 border-t border-green-100 px-6 py-3 rounded-b-xl">
+            <div class="flex items-center gap-2 text-secondary">
+                <i class="fa fa-check-circle"></i>
+                <p>数据接收完成</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- 页脚 -->
+<footer class="bg-dark text-white py-6">
+    <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+        <p>SSE 实时数据展示页面 &copy; 2024 | 基于 Server-Sent Events 技术</p>
+        <p class="mt-1">接口地址：<span class="text-primary">http://dev.test.com/sse</span></p>
+    </div>
+</footer>
+
+<script>
+    // 全局变量
+    let sse = null;
+    let isConnected = false;
+    let totalChars = 0;
+
+    // DOM 元素
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const dataContainer = document.getElementById('data-container');
+    const loadingContainer = document.getElementById('loading-container');
+    const errorContainer = document.getElementById('error-container');
+    const completeContainer = document.getElementById('complete-container');
+    const statusIndicator = document.getElementById('status-indicator');
+    const charCount = document.getElementById('char-count');
+    const errorMessage = document.getElementById('error-message');
+
+    // 初始化状态
+    function resetState() {
+        isConnected = false;
+        totalChars = 0;
+        charCount.textContent = '0';
+
+        // 更新按钮状态
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        clearBtn.disabled = true;
+
+        // 更新状态指示器
+        statusIndicator.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                <span class="text-gray-500">未连接</span>
+            `;
+
+        // 隐藏辅助容器
+        loadingContainer.classList.add('hidden');
+        errorContainer.classList.add('hidden');
+        completeContainer.classList.add('hidden');
+    }
+
+    // 清空数据
+    function clearData() {
+        dataContainer.innerHTML = `
+                <div class="text-gray-400 text-center py-12">
+                    <i class="fa fa-comment-o text-4xl mb-3"></i>
+                    <p>点击"开始接收数据"按钮，实时内容将显示在这里</p>
+                </div>
+            `;
+        totalChars = 0;
+        charCount.textContent = '0';
+        clearBtn.disabled = true;
+    }
+
+    // 更新状态指示器
+    function updateStatus(isRunning, isError = false, message = '') {
+        if (isError) {
+            statusIndicator.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-danger animate-pulse"></span>
+                    <span class="text-danger">${message || '连接错误'}</span>
+                `;
+            errorMessage.textContent = message || '无法连接到 SSE 接口，请检查接口地址是否正确';
+            errorContainer.classList.remove('hidden');
+            loadingContainer.classList.add('hidden');
+            return;
+        }
+
+        if (isRunning) {
+            statusIndicator.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                    <span class="text-secondary">正在接收数据</span>
+                `;
+            loadingContainer.classList.add('hidden');
+            errorContainer.classList.add('hidden');
+        } else {
+            statusIndicator.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                    <span class="text-gray-500">已断开连接</span>
+                `;
+        }
+    }
+
+    // 开始接收 SSE 数据
+    function startSSE() {
+        // 重置状态
+        dataContainer.innerHTML = '';
+        resetState();
+
+        // 显示加载动画
+        loadingContainer.classList.remove('hidden');
+        updateStatus(false);
+
+        // 禁用开始按钮
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+
+        // 建立 SSE 连接
+        try {
+            sse = new EventSource('http://dev.test.com/sse');
+
+            // 连接成功
+            sse.onopen = function() {
+                isConnected = true;
+                updateStatus(true);
+                clearBtn.disabled = false;
+            };
+
+            // 接收数据
+            sse.onmessage = function(event) {
+                try {
+                    // 解析 SSE 数据（兼容标准格式和自定义格式）
+                    const data = JSON.parse(event.data);
+
+                    // 根据数据类型处理
+                    if (data.type === 'text' && data.content) {
+                        // 实时添加文本（带渐入动画）
+                        const textNode = document.createElement('span');
+                        textNode.textContent = data.content;
+                        textNode.className = 'animate-fade-in';
+                        dataContainer.appendChild(textNode);
+
+                        // 更新字符计数
+                        totalChars += data.content.length;
+                        charCount.textContent = totalChars.toString();
+
+                        // 滚动到底部
+                        dataContainer.scrollTop = dataContainer.scrollHeight;
+                    }
+                    // 接收完成
+                    else if (data.type === 'complete') {
+                        completeContainer.classList.remove('hidden');
+                        stopSSE();
+                        updateStatus(false, false, '数据接收完成');
+                    }
+                    // 错误信息
+                    else if (data.type === 'error') {
+                        updateStatus(false, true, data.msg);
+                        stopSSE();
+                    }
+                } catch (e) {
+                    // 兼容非JSON格式数据
+                    const textNode = document.createElement('span');
+                    textNode.textContent = event.data;
+                    textNode.className = 'animate-fade-in text-gray-600';
+                    dataContainer.appendChild(textNode);
+
+                    totalChars += event.data.length;
+                    charCount.textContent = totalChars.toString();
+                    dataContainer.scrollTop = dataContainer.scrollHeight;
+                }
+            };
+
+            // 连接错误
+            sse.onerror = function(error) {
+                updateStatus(false, true, `连接错误: ${error.type || '未知错误'}`);
+                stopSSE();
+            };
+
+        } catch (e) {
+            updateStatus(false, true, `初始化错误: ${e.message}`);
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+    }
+
+    // 停止接收 SSE 数据
+    function stopSSE() {
+        if (sse) {
+            sse.close();
+            sse = null;
+        }
+
+        isConnected = false;
+        updateStatus(false);
+
+        // 更新按钮状态
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+    }
+
+    // 绑定事件监听
+    startBtn.addEventListener('click', startSSE);
+    stopBtn.addEventListener('click', stopSSE);
+    clearBtn.addEventListener('click', clearData);
+
+    // 页面关闭时断开连接
+    window.addEventListener('beforeunload', function() {
+        if (sse) {
+            sse.close();
+        }
+    });
+
+    // 初始化
+    resetState();
+</script>
+</body>
+</html>

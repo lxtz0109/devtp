@@ -20,7 +20,7 @@ class ProgressBarCommand extends Command
     {
 
         // 模拟要处理的数据总量
-        $total = 108;
+        $total = 100;
 
         // 创建进度条
         $progressBar = new ProgressBar( new ConsoleOutput(), $total);
@@ -32,7 +32,7 @@ class ProgressBarCommand extends Command
         echo "开始时间：".date("Y-m-d H:i:s")."\n";
         // 模拟处理过程
         for ($i = 0; $i < $total; $i++) {
-            sleep(60);
+            sleep(18);
             // 更新进度条
             $progressBar->advance();
 

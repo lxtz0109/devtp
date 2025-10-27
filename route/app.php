@@ -42,3 +42,6 @@ Route::get('lottery/millon', 'LotteryController/millon');
 //redis测试
 Route::get('redistest', 'RedisController/cacheExample');
 
+//see测试
+Route::get('sse', 'index/sse');
+
