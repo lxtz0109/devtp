@@ -12,7 +12,11 @@
 use think\App;
 
 // [ 应用入口文件 ]
-
+// 允许跨域
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE');
+header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
+header('Access-Control-Allow-Credentials: true');
 require __DIR__ . '/../vendor/autoload.php';
 
 // 执行HTTP应用并响应

@@ -5,6 +5,7 @@ namespace app\controller;
 use app\BaseController;
 use think\facade\View;
 use think\facade\Db;
+use app\model\LeagueGame;
 class Index extends BaseController
 {
     public function indexadmin()
@@ -415,6 +416,19 @@ class Index extends BaseController
             ob_flush(); // 刷新PHP自身缓冲区
         }
         flush(); // 刷新系统缓冲区（确保数据发送到客户端）
+    }
+
+    public function teamInfo(){
+
+            // 查询全部数据
+            $data = LeagueGame::select();
+
+            // 转换为数组
+            $array = $data->toArray();
+
+            // 返回 JSON 数据
+            return json($array);
+
     }
 
 }
