@@ -45,3 +45,5 @@ Route::get('redistest', 'RedisController/cacheExample');
 //see测试
 Route::get('sse', 'index/sse');
 
+//see测试
+Route::get('teaminfo', 'index/teamInfo');
